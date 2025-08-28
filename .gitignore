@@ -1,0 +1,12 @@
+# Ambientes virtuais
+.venv/
+__pycache__/
+*.pyc
+
+# Segredos
+.env
+.env.*
+
+# Arquivos temporários
+*.log
+*.tmp
