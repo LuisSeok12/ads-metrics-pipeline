@@ -94,7 +94,6 @@ API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
   1. Download of `ads_spend.csv` (Google Drive).
   2. POST request to `http://host.docker.internal:8000/ingest`.
 
-![screenshot-workflow](docs/n8n_workflow.png)
 
 ---
 
