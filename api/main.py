@@ -38,7 +38,7 @@ def table_exists(con: duckdb.DuckDBPyConnection, name: str = "ads_spend") -> boo
     return row is not None
 
 # -------------------------
-# Ingestão (escrita)
+# Ingestion and Metrics Endpoints
 # -------------------------
 @app.post("/ingest")
 async def ingest(file: UploadFile = File(...)):
@@ -48,45 +48,26 @@ async def ingest(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(400, f"CSV inválido: {e}")
 
-    # Tipos e normalização
     df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.date
     for col in ["spend", "clicks", "impressions", "conversions"]:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
     df["account"] = df["account"].astype(str)
 
-    # Metadados
+  
     df["load_date"] = date.today()
     df["source_file_name"] = file.filename or "upload.csv"
 
-    con = duckdb.connect(DB_PATH)  # escrita
+    con = duckdb.connect(DB_PATH)  
     ensure_schema(con)
     con.register("tmp_df", df)
 
-    # (opcional) upsert simples para evitar duplicatas — descomente e ajuste a chave se quiser
-    # con.execute("""
-    # DELETE FROM ads_spend t
-    # USING tmp_df s
-    # WHERE
-    #   t.date = s.date AND
-    #   t.platform = s.platform AND
-    #   t.account = s.account AND
-    #   t.campaign = s.campaign AND
-    #   t.country = s.country AND
-    #   t.device = s.device AND
-    #   t.spend = s.spend AND
-    #   t.clicks = s.clicks AND
-    #   t.impressions = s.impressions AND
-    #   t.conversions = s.conversions;
-    # """)
 
     con.execute("INSERT INTO ads_spend SELECT * FROM tmp_df")
     total = con.execute("SELECT COUNT(*) FROM ads_spend").fetchone()[0]
     con.close()
     return {"status": "ok", "inserted_rows": len(df), "total_rows": total, "db_path": DB_PATH}
 
-# -------------------------
-# Métricas (somente leitura)
-# -------------------------
+
 @app.get("/metrics")
 def metrics(start: date = Query(...), end: date = Query(...)):
     con = duckdb.connect(DB_PATH, read_only=True)  # leitura
