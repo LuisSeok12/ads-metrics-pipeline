@@ -124,7 +124,7 @@ def compare_30d():
     con = duckdb.connect(DB_PATH, read_only=True)
     if not table_exists(con):
         con.close()
-        raise HTTPException(404, "Tabela 'ads_spend' não encontrada. Faça uma ingestão primeiro.")
+        raise HTTPException(404, "Table 'ads_spend' not found. Please ingest data first.")
     q = """
     WITH bounds AS (
       SELECT
