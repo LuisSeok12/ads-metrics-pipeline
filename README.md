@@ -86,7 +86,7 @@ API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 🔄 n8n Workflow
+## n8n Workflow
 
 * Exported workflow available at `workflows/ingest_n8n.json`.
 * It performs:
